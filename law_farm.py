@@ -1,4 +1,7 @@
 import asyncio
+import os
+import json
+from io import StringIO
 from telegram import ReplyKeyboardMarkup, Update
 from telegram.ext import (
     ApplicationBuilder, CommandHandler, MessageHandler,
@@ -8,20 +11,16 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime, timedelta
 from collections import Counter
-from pytz import utc
-from telegram.ext import Application, ApplicationBuilder, JobQueue
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-
 
 # === CONFIG ===
 SHEET_URL = "https://docs.google.com/spreadsheets/d/1XA2x26P6FQktl1JR8YdZVOPW3FqcRYzIlvxJnxgrdKE/edit"
 TAB_NAME = "New law firms"
-CREDENTIAL_PATH = r"X:\instalink\credentials.json"
-BOT_TOKEN = "8082606695:AAEBQuoUMuC3eD7_sNCaUqSAHXIi-51azlU"
+BOT_TOKEN = os.environ["BOT_TOKEN"]
 
-# === Sheet Setup ===
+# === SHEET SETUP USING ENV VARIABLE ===
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-creds = ServiceAccountCredentials.from_json_keyfile_name(CREDENTIAL_PATH, scope)
+creds_dict = json.load(StringIO(os.environ["GOOGLE_CREDS_JSON"]))
+creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
 client = gspread.authorize(creds)
 sheet = client.open_by_url(SHEET_URL).worksheet(TAB_NAME)
 
